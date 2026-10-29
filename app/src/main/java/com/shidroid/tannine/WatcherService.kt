@@ -21,9 +21,19 @@ class WatcherService : Service() {
 
     private val tick = object : Runnable {
         override fun run() {
-            if (ForegroundAppDetector.hasAccess(this@WatcherService)) {
+            if (!prefs.enabled) {
+                controller.restore()
+            } else if (prefs.universalMode) {
+                controller.applyNever()
+            } else if (ForegroundAppDetector.hasAccess(this@WatcherService)) {
                 val fg = detector.poll()
-                if (fg != null && fg in prefs.triggerApps) controller.applyNever() else controller.restore()
+                if (prefs.enabled && fg != null && fg in prefs.triggerApps) {
+                    controller.applyNever()
+                } else {
+                    controller.restore()
+                }
+            } else {
+                controller.restore()
             }
             handler.postDelayed(this, POLL_MS)
         }

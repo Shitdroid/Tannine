@@ -1,10 +1,12 @@
 <div align="center">
 
+<img src="docs/images/tannine-icon.svg" alt="Tannine app icon" width="120">
+
 # Tannine
 
 ### Keep your screen awake where it matters.
 
-An Android app that keeps the screen on for the apps you choose—not for your entire device.
+An Android app that keeps the screen on exactly where you need it.
 
 <p>
   <a href="#features">Features</a>
@@ -32,13 +34,13 @@ The idea was inspired by [Kaffeine](https://play.google.com/store/apps/details?i
 
 ## See it in action
 
-> Screenshots will be added as the UI is finalized.
+Tannine's main screen lets you switch between **Selected apps** and **Universal** mode, then turn the service on or off independently. 
 
 <div align="center">
 
-| Choose your apps | Keep the screen awake | Customize appearance |
+| Selection Mode | Universal Mode | Customize appearance |
 |:---:|:---:|:---:|
-| <img src="docs/images/app-selection.png" alt="Tannine app selection screen" width="220"> | <img src="docs/images/active-app.png" alt="Tannine enabled with a selected app" width="220"> | <img src="docs/images/settings.png" alt="Tannine appearance settings" width="220"> |
+| <img src="docs/images/selection_mode.png" alt="Tannine app selection screen" width="220"> | <img src="docs/images/universal_mode.png" alt="Tannine enabled with a selected app" width="220"> | <img src="docs/images/settings.png" alt="Tannine appearance settings" width="220"> |
 
 </div>
 
@@ -55,25 +57,25 @@ Choose exactly which apps are allowed to keep the screen awake. Other apps conti
 </td>
 <td width="50%" valign="top">
 
-### Foreground detection
+### Two operating modes
 
-Tannine watches which app is currently in use and activates the screen-awake behavior only for registered apps.
+Use **Selected apps** for app-specific behavior or **Universal** to keep the screen awake across the entire device.
 
 </td>
 </tr>
 <tr>
 <td width="50%" valign="top">
 
-### Timeout restoration
+### Independent service toggle
 
-When you leave a registered app, Tannine restores the screen-timeout setting that was active before.
+Switch the Tannine service on or off independently from the selected mode. Changing modes does not delete your selected apps.
 
 </td>
 <td width="50%" valign="top">
 
-### Built for Android
+### Quick Settings tile
 
-Uses Android's usage-access and system-settings APIs, with a foreground service for reliable monitoring.
+Toggle the service from the Android Quick Settings panel. The tile follows the mode selected in the app.
 
 </td>
 </tr>
@@ -81,13 +83,19 @@ Uses Android's usage-access and system-settings APIs, with a foreground service 
 
 ## How it works
 
-1. Register the apps you want Tannine to manage.
-2. Grant usage access and permission to modify system settings.
-3. Start Tannine.
-4. Open a registered app—the screen stays awake while it is in the foreground.
-5. Leave the app—Tannine returns control to your normal screen timeout.
+1. Choose **Selected apps** or **Universal** mode.
+2. In Selected apps mode, register the apps you want Tannine to manage.
+3. Grant usage access and permission to modify system settings.
+4. Turn the service on from the app or the Quick Settings tile.
+5. In Selected apps mode, open a registered app—the screen stays awake while it is in the foreground.
+6. In Universal mode, the screen stays awake across the device while the service is on.
+7. Turn the service off to restore your normal screen timeout.
 
 Tannine does not read the content of other apps. It only uses foreground-app information to decide when the screen-awake behavior should be active.
+
+### Quick Settings
+
+The Quick Settings tile is a service toggle, not a mode selector yet. It respects whichever mode is currently selected in Tannine and updates the app's service state when you return to the main screen. Choosing the mode directly from Quick Settings is planned for a future iteration.
 
 ## Getting started
 
@@ -130,11 +138,12 @@ Permission names and setup screens may vary by Android version and device manufa
 
 Tannine is intentionally starting small. These are the next planned improvements:
 
-- [ ] Add a device-wide keep-screen-awake toggle
+- [x] Add a device-wide keep-screen-awake toggle
 - [ ] Start Tannine automatically when a registered app is opened
-- [ ] Add a Quick Settings tile
+- [x] Add a Quick Settings tile
 - [ ] Improve onboarding and permission guidance
-- [ ] Add polished UI screenshots and automated tests
+- [x] Add polished UI screenshots
+- [ ] Add automated tests
 
 Have an idea or a use case that would make Tannine more useful? Open an issue and describe it.
 
@@ -146,6 +155,7 @@ app/src/main/java/com/shidroid/tannine/
 ├── WatcherService.kt           # Foreground monitoring service
 ├── ForegroundAppDetector.kt   # Current foreground-app detection
 ├── TimeoutController.kt        # Screen-timeout management
+├── TannineTileService.kt       # Quick Settings tile
 └── BootReceiver.kt             # Startup handling
 ```
 

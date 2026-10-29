@@ -10,6 +10,10 @@ class Prefs(context: Context) {
         get() = sp.getBoolean("enabled", false)
         set(v) = sp.edit { putBoolean("enabled", v) }
 
+    var universalMode: Boolean
+        get() = sp.getBoolean("universal_mode", sp.getBoolean("universal_enabled", false))
+        set(v) = sp.edit { putBoolean("universal_mode", v) }
+
     var triggerApps: Set<String>
         get() = sp.getStringSet("trigger_apps", emptySet()) ?: emptySet()
         set(v) = sp.edit { putStringSet("trigger_apps", v.toSet()) }

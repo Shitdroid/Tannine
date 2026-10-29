@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" role="img" aria-labelledby="title">
+  <title>Tannine app icon</title>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E8F91"/>
+      <stop offset="1" stop-color="#024446"/>
+    </linearGradient>
+  </defs>
+  <rect width="108" height="108" rx="24" fill="url(#background)"/>
+  <path fill="#D9EDEC" d="M30 69h48c0 4.7-3.1 7-8 7H38c-4.9 0-8-2.3-8-7Z"/>
+  <path d="M72 54c10 0 9 12-2 11" fill="none" stroke="#FFF4DC" stroke-width="3.2" stroke-linecap="round"/>
+  <path fill="#FFF4DC" d="M35 50h38v8c0 7.3-4.1 11-11 11H46c-7 0-11-3.7-11-11v-8Z"/>
+  <path fill="#E9D7B0" d="M35 50c0-4.5 38-4.5 38 0s-38 4.5-38 0Z"/>
+  <path fill="#E9A63B" d="M38 50.2c0-3.2 32-3.2 32 0s-32 3.2-32 0Z"/>
+  <path d="M46 43c-4-5-0-10 0-10s4-5 0-10M55 44c-4-5 0-10 0-10s4-5 0-10" fill="none" stroke="#CCFFFFFF" stroke-width="2.6" stroke-linecap="round"/>
+  <path fill="#B5E48C" d="M63 42c1-11 13-14 13-14 0 12-13 14-13 14Z"/>
+  <path d="m64 41 10-11" fill="none" stroke="#2E7D32" stroke-width="1.1" stroke-linecap="round"/>
+</svg>

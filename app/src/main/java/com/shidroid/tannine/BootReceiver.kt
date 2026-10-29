@@ -6,8 +6,9 @@ import android.content.Intent
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED && Prefs(context).enabled &&
-            ForegroundAppDetector.hasAccess(context)
+        val prefs = Prefs(context)
+        if (intent.action == Intent.ACTION_BOOT_COMPLETED && prefs.enabled &&
+            (prefs.universalMode || ForegroundAppDetector.hasAccess(context))
         ) {
             WatcherService.start(context)
         }

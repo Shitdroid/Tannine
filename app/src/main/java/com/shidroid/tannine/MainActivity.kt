@@ -160,12 +160,21 @@ private fun MainScreen(
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { refresh++ }
     val canWrite = remember(refresh) { controller.canWrite() }
     val hasUsage = remember(refresh) { ForegroundAppDetector.hasAccess(context) }
-    val ready = canWrite && hasUsage
+    val selectedModeReady = canWrite && hasUsage
+    val universalModeReady = canWrite
 
     var enabled by remember { mutableStateOf(prefs.enabled) }
+    var universalMode by remember { mutableStateOf(prefs.universalMode) }
     var selected by remember { mutableStateOf(prefs.triggerApps) }
     var query by remember { mutableStateOf("") }
     var showSettings by remember { mutableStateOf(false) }
+    val modeReady = if (universalMode) universalModeReady else selectedModeReady
+
+    LaunchedEffect(refresh) {
+        enabled = prefs.enabled
+        universalMode = prefs.universalMode
+        selected = prefs.triggerApps
+    }
 
     val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     LaunchedEffect(Unit) {
@@ -176,8 +185,12 @@ private fun MainScreen(
     }
 
     // Keep the service in step with the switch and permissions.
-    LaunchedEffect(enabled, ready) {
-        if (enabled && ready) WatcherService.start(context) else WatcherService.stop(context)
+    LaunchedEffect(enabled, universalMode, selectedModeReady, universalModeReady) {
+        if (enabled && modeReady) {
+            WatcherService.start(context)
+        } else {
+            WatcherService.stop(context)
+        }
     }
 
     val apps by produceState(emptyList<AppEntry>()) { value = withContext(Dispatchers.IO) { loadApps(context) } }
@@ -222,25 +235,40 @@ private fun MainScreen(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             item(key = "status") {
-                StatusCard(enabled, ready, selected.size) { enabled = it; prefs.enabled = it }
+                StatusCard(enabled, modeReady, universalMode, selected.size) {
+                    enabled = it
+                    prefs.enabled = it
+                    TannineTileService.requestRefresh(context)
+                }
             }
-            if (!ready) item(key = "setup") {
+            item(key = "mode") {
+                ModeSelector(universalMode) {
+                    universalMode = it
+                    prefs.universalMode = it
+                    TannineTileService.requestRefresh(context)
+                }
+            }
+            if (!canWrite || (!universalMode && !hasUsage)) item(key = "setup") {
                 SetupCard(canWrite, hasUsage, Modifier.padding(top = 12.dp))
             }
             item(key = "search") {
-                SearchField(query, { query = it }, Modifier.padding(top = 16.dp, bottom = 8.dp))
+                SearchField(
+                    query, { query = it },
+                    Modifier.padding(top = 16.dp, bottom = 8.dp),
+                    enabled = !universalMode
+                )
             }
-            if (selectedApps.isNotEmpty()) {
+            if (!universalMode && selectedApps.isNotEmpty()) {
                 item(key = "h_sel") { SectionHeader(stringResource(R.string.selected_apps, selectedApps.size)) }
                 itemsIndexed(selectedApps, key = { _, a -> "s_" + a.pkg }) { i, app ->
                     AppRow(app, true, groupShape(i, selectedApps.size)) { toggle(app.pkg) }
                 }
                 if (otherApps.isNotEmpty()) item(key = "h_all") { SectionHeader(stringResource(R.string.all_apps)) }
             }
-            itemsIndexed(otherApps, key = { _, a -> a.pkg }) { i, app ->
+            if (!universalMode) itemsIndexed(otherApps, key = { _, a -> a.pkg }) { i, app ->
                 AppRow(app, app.pkg in selected, groupShape(i, otherApps.size)) { toggle(app.pkg) }
             }
-            if (apps.isNotEmpty() && matching.isEmpty()) item(key = "empty") {
+            if (!universalMode && apps.isNotEmpty() && matching.isEmpty()) item(key = "empty") {
                 Text(
                     stringResource(R.string.no_results), Modifier.fillMaxWidth().padding(32.dp),
                     style = MaterialTheme.typography.bodyMedium,
@@ -265,7 +293,13 @@ private fun groupShape(index: Int, size: Int) = RoundedCornerShape(
 )
 
 @Composable
-private fun StatusCard(enabled: Boolean, ready: Boolean, count: Int, onChange: (Boolean) -> Unit) {
+private fun StatusCard(
+    enabled: Boolean,
+    ready: Boolean,
+    universalMode: Boolean,
+    count: Int,
+    onChange: (Boolean) -> Unit
+) {
     val active = enabled && ready
     val colors = MaterialTheme.colorScheme
     val container = if (active) colors.primary else colors.surfaceContainerHigh
@@ -277,7 +311,12 @@ private fun StatusCard(enabled: Boolean, ready: Boolean, count: Int, onChange: (
     ) {
         Row(
             Modifier
-                .toggleable(active, enabled = ready, role = Role.Switch, onValueChange = onChange)
+                .toggleable(
+                    active,
+                    enabled = enabled || ready,
+                    role = Role.Switch,
+                    onValueChange = onChange
+                )
                 .heightIn(min = 88.dp)
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -300,6 +339,7 @@ private fun StatusCard(enabled: Boolean, ready: Boolean, count: Int, onChange: (
                     when {
                         !ready -> stringResource(R.string.status_setup)
                         !enabled -> stringResource(R.string.status_off)
+                        universalMode -> stringResource(R.string.mode_universal)
                         count == 0 -> stringResource(R.string.status_none)
                         else -> pluralStringResource(R.plurals.status_active, count, count)
                     },
@@ -307,6 +347,33 @@ private fun StatusCard(enabled: Boolean, ready: Boolean, count: Int, onChange: (
                 )
             }
             Switch(active, null, enabled = ready)
+        }
+    }
+}
+
+@Composable
+private fun ModeSelector(universalMode: Boolean, onModeChange: (Boolean) -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            stringResource(R.string.mode),
+            Modifier.padding(start = 16.dp),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+            val labels = listOf(R.string.mode_selected, R.string.mode_universal)
+            labels.forEachIndexed { index, label ->
+                SegmentedButton(
+                    selected = universalMode == (index == 1),
+                    onClick = { onModeChange(index == 1) },
+                    shape = SegmentedButtonDefaults.itemShape(index, labels.size)
+                ) {
+                    Text(stringResource(label))
+                }
+            }
         }
     }
 }
@@ -350,9 +417,15 @@ private fun PermissionRow(text: String, granted: Boolean, onGrant: () -> Unit) {
 }
 
 @Composable
-private fun SearchField(query: String, onQuery: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun SearchField(
+    query: String,
+    onQuery: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
     TextField(
         query, onQuery, modifier.fillMaxWidth(),
+        enabled = enabled,
         placeholder = { Text(stringResource(R.string.search_apps)) },
         leadingIcon = { Icon(Icons.Filled.Search, null) },
         trailingIcon = {

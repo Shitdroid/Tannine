@@ -2,6 +2,10 @@
     <string name="app_name">Tannine</string>
     <string name="notification_text">Watching for selected apps</string>
     <string name="enable">Keep screen awake</string>
+    <string name="mode">Mode</string>
+    <string name="mode_selected">Selected apps</string>
+    <string name="mode_universal">Universal</string>
+    <string name="quick_settings_tile_label">Tannine</string>
     <string name="status_setup">Finish setup below to get started</string>
     <string name="status_off">Off</string>
     <string name="status_none">On · pick apps below</string>
