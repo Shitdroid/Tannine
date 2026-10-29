@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Tannine</string>
+    <string name="notification_text">Watching for selected apps</string>
+    <string name="enable">Keep screen awake</string>
+    <string name="status_setup">Finish setup below to get started</string>
+    <string name="status_off">Off</string>
+    <string name="status_none">On · pick apps below</string>
+    <plurals name="status_active">
+        <item quantity="one">On · %1$d app selected</item>
+        <item quantity="other">On · %1$d apps selected</item>
+    </plurals>
+    <string name="setup_title">Permissions needed</string>
+    <string name="need_write_settings">Modify system settings, to change the screen timeout</string>
+    <string name="need_usage_access">Usage access, to see which app is open</string>
+    <string name="grant">Grant</string>
+    <string name="search_apps">Search apps</string>
+    <string name="clear">Clear</string>
+    <string name="selected_apps">Selected · %1$d</string>
+    <string name="all_apps">All apps</string>
+    <string name="no_results">No apps found</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="dynamic_color">Dynamic color</string>
+    <string name="dynamic_color_desc">Match your wallpaper colors</string>
+    <string name="done">Done</string>
+    <string name="accent_color">Accent color</string>
+</resources>
